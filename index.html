@@ -468,7 +468,6 @@
         function addToFormula(symbol) {
             formula += symbol;
             updateDisplay();
-            animateButton();
         }
 
         function backspace() {
@@ -491,10 +490,6 @@
                 formulaDisplay.classList.add('bounce');
                 setTimeout(() => formulaDisplay.classList.remove('bounce'), 500);
             }
-        }
-
-        function animateButton() {
-            // Add visual feedback when buttons are clicked
         }
 
         function evaluateFormula() {
@@ -573,10 +568,11 @@
         function evaluateWithValues(formula, values) {
             let expr = formula;
             
-            // Replace variables with their boolean values
+            // Replace variables with their boolean values (using word boundaries to avoid partial matches)
             for (let variable in values) {
                 const value = values[variable];
-                expr = expr.replaceAll(variable, value.toString());
+                const regex = new RegExp('\\b' + variable + '\\b', 'g');
+                expr = expr.replace(regex, value.toString());
             }
 
             // Replace logical operators with JavaScript equivalents
@@ -597,6 +593,10 @@
             }
 
             try {
+                // Sanitize expression before evaluation - ensure it only contains safe characters
+                if (!/^[()!&|truefals\s]+$/.test(expr)) {
+                    throw new Error('Invalid expression after transformation');
+                }
                 return eval(expr);
             } catch (e) {
                 console.error('Evaluation error:', e, 'Expression:', expr);
